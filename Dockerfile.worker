@@ -1,0 +1,28 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies for Playwright
+RUN apt-get update && apt-get install -y \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install Playwright browsers
+RUN playwright install --with-deps chromium
+
+COPY app app/
+
+# Non-root user setup is tricky with Playwright as it needs specific permissions sometimes
+# usage of ipc=host might be needed in k8s or shared memory adjustments
+# For now running as root in container is often standard for headless chrome in docker
+# But we can try to switch to a non-root user if needed, sticking to root for stability in this MVP unless specified strictly
+# Requirement said "Non-root user". Okay.
+
+RUN useradd -m myuser
+RUN chown -R myuser:myuser /app
+USER myuser
+
+CMD ["python", "-m", "app.workers.worker"]

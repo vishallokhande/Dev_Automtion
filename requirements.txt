@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+redis
+sqlalchemy
+psycopg2-binary
+pydantic
+playwright
+prometheus-fastapi-instrumentator
+python-multipart
+requests
+urllib3

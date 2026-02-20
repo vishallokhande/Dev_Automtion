@@ -1,0 +1,31 @@
+alertmanager:
+  enabled: true
+
+server:
+  global:
+    scrape_interval: 15s
+
+  # Persistent Volume for retention
+  persistentVolume:
+    enabled: true
+    size: 50Gi
+
+kubeStateMetrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true
+
+pushgateway:
+  enabled: false
+
+# Scrape config for our pods
+extraScrapeConfigs: |
+  - job_name: 'autoapply-api'
+    metrics_path: /metrics
+    kubernetes_sd_configs:
+      - role: pod
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: keep
+        regex: api

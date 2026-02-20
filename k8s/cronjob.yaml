@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: job-scheduler
+  namespace: autoapply
+spec:
+  schedule: "0 9 * * 1-5" # Run at 9 AM, Mon-Fri
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: scheduler
+            image: curlimages/curl
+            args:
+            - /bin/sh
+            - -c
+            - "curl -X POST http://api.autoapply.svc.cluster.local/api/v1/jobs -d '{\"title\":\"DevOps Engineer\",\"location\":\"Remote\",\"keywords\":[\"kubernetes\",\"aws\"]}'"
+          restartPolicy: OnFailure
