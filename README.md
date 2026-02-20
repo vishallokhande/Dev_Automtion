@@ -1,5 +1,7 @@
 # AUTOAPPLY-OPS: Distributed Browser Automation Platform
 
+[![GitHub Repo](https://img.shields.io/badge/GitHub-vishallokhande%2FDev__Automtion-blue?logo=github)](https://github.com/vishallokhande/Dev_Automtion)
+
 Enterprise-grade cloud-native project for automating job application workflows using Playwright on AWS EKS.
 
 ## Architecture
