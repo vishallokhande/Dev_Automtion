@@ -1,13 +1,15 @@
 import os
-import redis
 import json
 import logging
 import queue
 
 logger = logging.getLogger(__name__)
 
-# Global in-memory queue for local testing without Redis
-_local_queue = queue.Queue()
+# CRITICAL: The local queue MUST be a module-level singleton that is shared
+# between the API thread (pusher) and the Worker thread (consumer).
+# Both threads import this module — Python's import system caches modules,
+# so they see the same _local_queue object.
+_local_queue: queue.Queue = queue.Queue()
 
 USE_LOCAL_QUEUE = os.getenv("USE_LOCAL_QUEUE", "False").lower() == "true"
 
@@ -18,40 +20,49 @@ REDIS_DB = int(os.getenv("REDIS_DB", 0))
 redis_client = None
 if not USE_LOCAL_QUEUE:
     try:
-        pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
-        redis_client = redis.Redis(connection_pool=pool)
+        import redis as _redis
+        pool = _redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
+        redis_client = _redis.Redis(connection_pool=pool)
+        redis_client.ping()  # Test connection
+        logger.info("Redis connection established")
     except Exception as e:
-        logger.warning(f"Failed to connect to Redis: {e}. Falling back to local queue if allowed, or errors will occur.")
+        logger.warning(f"Redis unavailable: {e}. Falling back to local in-memory queue.")
+        USE_LOCAL_QUEUE = True
+
 
 def push_job_to_queue(job_data: dict):
     if USE_LOCAL_QUEUE:
-        logger.info("Pushing to local in-memory queue")
+        logger.info(f"[LocalQueue] Pushing job {job_data.get('id')} — queue size now {_local_queue.qsize() + 1}")
         _local_queue.put(json.dumps(job_data))
     else:
-        if redis_client:
-            redis_client.rpush("job_queue", json.dumps(job_data))
-        else:
-            logger.error("Redis client not initialized and local queue is disabled.")
+        redis_client.rpush("job_queue", json.dumps(job_data))
+        logger.info(f"[Redis] Pushed job {job_data.get('id')}")
+
 
 def pop_job_from_queue():
     if USE_LOCAL_QUEUE:
         try:
-            # Non-blocking get with timeout to simulate behavior
-            item = _local_queue.get(timeout=1) 
-            return json.loads(item)
+            item = _local_queue.get(timeout=1)
+            data = json.loads(item)
+            logger.info(f"[LocalQueue] Popped job {data.get('id')} — queue size now {_local_queue.qsize()}")
+            return data
         except queue.Empty:
             return None
     else:
-        if redis_client:
-            # Blocking pop
-            try:
-                item = redis_client.blpop("job_queue", timeout=5)
-                if item:
-                    return json.loads(item[1])
-            except redis.exceptions.ConnectionError:
-                pass
+        try:
+            item = redis_client.blpop("job_queue", timeout=5)
+            if item:
+                return json.loads(item[1])
+        except Exception as e:
+            logger.warning(f"Redis pop error: {e}")
         return None
 
-# For the worker to directly access the queue if needed in loop
-def get_local_queue():
-    return _local_queue
+
+def get_queue_size() -> int:
+    """Returns number of pending jobs in the queue."""
+    if USE_LOCAL_QUEUE:
+        return _local_queue.qsize()
+    try:
+        return redis_client.llen("job_queue") if redis_client else 0
+    except Exception:
+        return 0

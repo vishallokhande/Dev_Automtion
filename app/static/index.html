@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoApply-Ops | Automated Job Application Platform</title>
+    <meta name="description"
+        content="Automate your job hunt with Playwright-powered workers. Apply to thousands of jobs on LinkedIn and other platforms automatically.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="overlay active" role="dialog" aria-modal="true" aria-label="Authentication">
+        <div class="auth-modal">
+            <div class="auth-logo-wrap">
+                <div class="auth-logo-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <span class="auth-logo-text">AutoApply-Ops</span>
+            </div>
+
+            <!-- Tab switcher -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="tab-login" type="button">Sign In</button>
+                <button class="auth-tab" id="tab-signup" type="button">Sign Up</button>
+            </div>
+
+            <div id="auth-error" class="alert alert-error" style="display:none;"></div>
+            <div id="auth-success" class="alert alert-success" style="display:none;"></div>
+
+            <!-- LOGIN FORM -->
+            <form id="login-form" novalidate>
+                <div class="form-group">
+                    <label for="login-email">Email address</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                            </path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <input type="email" id="login-email" required placeholder="you@example.com"
+                            autocomplete="email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input type="password" id="login-password" required placeholder="••••••••"
+                            autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-full" id="login-submit-btn">
+                    <span class="btn-text">Sign In</span>
+                    <div class="btn-spinner" style="display:none;"></div>
+                </button>
+            </form>
+
+            <!-- SIGNUP FORM -->
+            <form id="signup-form" novalidate style="display:none;">
+                <div class="form-group">
+                    <label for="signup-name">Full Name</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        <input type="text" id="signup-name" required placeholder="John Doe" autocomplete="name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="signup-email">Email address</label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z">
+                            </path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                        <input type="email" id="signup-email" required placeholder="you@example.com"
+                            autocomplete="email">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="signup-password">Password <small style="color:var(--text-muted);">(min. 6
+                            characters)</small></label>
+                    <div class="input-wrapper">
+                        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                        <input type="password" id="signup-password" required placeholder="••••••••"
+                            autocomplete="new-password" minlength="6">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-full" id="signup-submit-btn">
+                    <span class="btn-text">Create Account</span>
+                    <div class="btn-spinner" style="display:none;"></div>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Settings / Profile Modal -->
+    <div id="settings-overlay" class="overlay" role="dialog" aria-modal="true" aria-label="User Profile Settings">
+        <div class="settings-modal">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <h2>Profile Settings</h2>
+                    <p class="modal-subtitle">Manage your account and application preferences</p>
+                </div>
+                <button class="btn btn-icon close-settings" title="Close" aria-label="Close settings">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div id="settings-error" class="alert alert-error" style="display:none;"></div>
+                <div id="settings-success" class="alert alert-success" style="display:none;"></div>
+
+                <!-- Profile Section -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        Personal Information
+                    </h3>
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label for="profile-name">Full Name</label>
+                            <input type="text" id="profile-name" placeholder="John Doe" autocomplete="name">
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-details">Professional Summary</label>
+                            <textarea id="profile-details" rows="3"
+                                placeholder="Senior Software Engineer with 5+ years in backend development..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="profile-li-cookie">
+                                LinkedIn Session Cookie
+                                <span
+                                    style="font-size:11px; color: var(--text-muted); font-weight: 400; margin-left: 6px;">
+                                    (DevTools → Application → Cookies → linkedin.com → <code
+                                        style="font-size:10px; background: rgba(255,255,255,0.08); padding: 1px 4px; border-radius: 3px;">li_at</code>)
+                                </span>
+                            </label>
+                            <input type="password" id="profile-li-cookie"
+                                placeholder="Paste li_at cookie value for authenticated automation" autocomplete="off">
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="save-profile-btn">
+                            <span class="btn-text">Save Changes</span>
+                            <div class="btn-spinner" style="display:none;"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <!-- Resume Section -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Resume Upload
+                    </h3>
+                    <form id="resume-upload-form">
+                        <div class="form-group">
+                            <label>Upload your PDF resume</label>
+                            <div class="file-upload-area" id="file-upload-area">
+                                <input type="file" id="resume-file" accept=".pdf" required>
+                                <div class="file-upload-content">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="16 16 12 12 8 16"></polyline>
+                                        <line x1="12" y1="12" x2="12" y2="21"></line>
+                                        <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                                    </svg>
+                                    <p>Drop your PDF here, or <span class="link">browse</span></p>
+                                    <span class="file-upload-hint">PDF files only, max 10MB</span>
+                                </div>
+                                <div class="file-selected-name" id="file-selected-name" style="display:none;"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-secondary" id="upload-resume-btn">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="16 16 12 12 8 16"></polyline>
+                                <line x1="12" y1="12" x2="12" y2="21"></line>
+                                <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path>
+                            </svg>
+                            <span class="btn-text">Upload Resume</span>
+                            <div class="btn-spinner" style="display:none;"></div>
+                        </button>
+                    </form>
+                </div>
+
+                <div class="settings-divider"></div>
+
+                <!-- Danger Zone -->
+                <div class="settings-section">
+                    <h3 class="settings-section-title danger-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                        Danger Zone
+                    </h3>
+                    <button id="logout-btn" class="btn btn-danger w-full">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        Sign Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Layout -->
+    <div class="layout" id="main-layout" style="display: none;">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <span class="brand-name">AutoApply-Ops</span>
+            </div>
+
+            <nav class="nav-menu" role="navigation" aria-label="Main navigation">
+                <a href="#" class="nav-link active" data-page="dashboard" aria-label="Dashboard">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="9"></rect>
+                        <rect x="14" y="3" width="7" height="5"></rect>
+                        <rect x="14" y="12" width="7" height="9"></rect>
+                        <rect x="3" y="16" width="7" height="5"></rect>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-link" data-page="jobs" aria-label="Job logs">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    Job Logs
+                </a>
+                <a href="#" class="nav-link" id="nav-settings" aria-label="Settings">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path
+                            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                        </path>
+                    </svg>
+                    Settings
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="sidebar-user" id="sidebar-user">
+                    <div class="avatar" id="sidebar-avatar">U</div>
+                    <div class="sidebar-user-info">
+                        <span class="sidebar-user-name" id="sidebar-user-name">User</span>
+                        <span class="sidebar-user-email" id="sidebar-user-email"></span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Navigation Bar -->
+            <header class="top-nav">
+                <div class="top-nav-left">
+                    <h2 class="page-title" id="page-title">Dashboard</h2>
+                </div>
+                <div class="top-nav-right">
+                    <div class="status-indicator">
+                        <div class="status-dot active"></div>
+                        <span>System Online</span>
+                    </div>
+                    <button class="avatar-btn" id="top-nav-user" title="Open settings"
+                        aria-label="Open profile settings">
+                        <div class="avatar" id="nav-avatar">U</div>
+                        <span id="nav-email" class="nav-email-text">User</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Page -->
+            <div class="page" id="page-dashboard">
+                <div class="content-wrapper">
+                    <!-- Stats Row -->
+                    <div class="stats-grid" id="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon-blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="stat-total">0</span>
+                                <span class="stat-label">Total Jobs</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon-green">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="stat-success">0</span>
+                                <span class="stat-label">Successful</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon-yellow">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="stat-pending">0</span>
+                                <span class="stat-label">Pending</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon stat-icon-red">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-value" id="stat-failed">0</span>
+                                <span class="stat-label">Failed</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Grid -->
+                    <div class="dashboard-grid">
+                        <!-- Create Job Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <h3>New Automation</h3>
+                                    <p class="card-subtitle">Configure and launch a job search automation</p>
+                                </div>
+                                <div class="powered-badge">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                    </svg>
+                                    Playwright
+                                </div>
+                            </div>
+
+                            <div id="form-error" class="alert alert-error" style="display:none;"></div>
+                            <div id="form-success" class="alert alert-success" style="display:none;"></div>
+
+                            <form id="create-job-form" novalidate>
+                                <div class="form-group">
+                                    <label for="job-title">Job Title <span class="required">*</span></label>
+                                    <input type="text" id="job-title" placeholder="e.g. Senior Software Engineer"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="job-location">Location <span class="required">*</span></label>
+                                    <input type="text" id="job-location"
+                                        placeholder="e.g. Remote, New York, San Francisco" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="job-keywords">Keywords <span class="required">*</span></label>
+                                    <input type="text" id="job-keywords"
+                                        placeholder="Python, FastAPI, AWS (comma separated)" required>
+                                    <span class="form-hint">These keywords help the bot find matching roles</span>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="job-time-filter">Posted Within</label>
+                                        <div class="select-wrapper">
+                                            <select id="job-time-filter">
+                                                <option value="any">Any time</option>
+                                                <option value="r86400">Past 24 hours</option>
+                                                <option value="r259200">Past 3 days</option>
+                                                <option value="r604800">Past week</option>
+                                                <option value="r2592000">Past month</option>
+                                            </select>
+                                            <svg class="select-arrow" width="14" height="14" viewBox="0 0 24 24"
+                                                fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="job-max-apps">Max Applications</label>
+                                        <input type="number" id="job-max-apps" min="1" max="100" value="5">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-full" id="submit-btn">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                    </svg>
+                                    <span class="btn-text">Launch Automation</span>
+                                    <div class="btn-spinner" style="display:none;"></div>
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Jobs List -->
+                        <div class="card">
+                            <div class="card-header">
+                                <div>
+                                    <h3>Recent Executions</h3>
+                                    <p class="card-subtitle">Live status of your automation jobs</p>
+                                </div>
+                                <button class="btn btn-icon" id="refresh-btn" title="Refresh jobs"
+                                    aria-label="Refresh jobs list">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <polyline points="1 20 1 14 7 14"></polyline>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15">
+                                        </path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="jobs-container" id="jobs-container" role="list"
+                                aria-label="Job automations list">
+                                <div class="empty-state" id="jobs-loading">
+                                    <div class="spinner"></div>
+                                    <p>Loading automations...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+
+    <!-- Job Card Template -->
+    <template id="job-card-template">
+        <div class="job-item" role="listitem">
+            <div class="job-item-main">
+                <div class="job-item-header">
+                    <h4 class="job-title"></h4>
+                    <div class="job-status-badge"></div>
+                </div>
+                <div class="job-meta">
+                    <span class="job-meta-item location">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </span>
+                    <span class="job-meta-item created-at">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </span>
+                </div>
+                <div class="job-tracking">
+                    <span class="track-item link-opened-wrap" style="display:none;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                        Opened: <span class="link-opened-time"></span>
+                    </span>
+                    <span class="track-item applied-at-wrap" style="display:none;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        Applied: <span class="applied-time"></span>
+                    </span>
+                </div>
+                <div class="job-keywords"></div>
+
+                <!-- Detailed Applied Jobs List -->
+                <div class="applied-jobs-list" style="display:none;">
+                    <div class="applied-jobs-header">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <span>Applied Roles (<span class="applied-jobs-count">0</span>)</span>
+                    </div>
+                    <ul class="applied-jobs-items"></ul>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

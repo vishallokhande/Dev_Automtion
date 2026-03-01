@@ -1,0 +1,41 @@
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Environment variables
+.env
+*.env
+
+# Local DB
+*.sqlite
+*.db
+
+# Logs and temp files
+*.log
+server_logs.txt
+
+# Test screenshots / debug images
+*.png
+*.jpg
+
+# Migration scripts (keep only if needed)
+migrate_db*.py
+
+# Test scripts
+test_ui.py
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
